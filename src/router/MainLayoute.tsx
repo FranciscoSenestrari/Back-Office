@@ -5,7 +5,7 @@ export function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen bg-gray-100 font-sans text-gray-900">
+    <div className="flex h-screen bg-gray-100 font-sans text-gray-900 min-w-0">
       {/* Sidebar */}
       <aside
         className={`bg-gray-800 text-white flex flex-col transition-all duration-300 ${
@@ -63,7 +63,7 @@ export function MainLayout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
         <header className="bg-white shadow p-4 flex items-center justify-between">
           <button
@@ -76,7 +76,7 @@ export function MainLayout() {
         </header>
 
         {/* Outlet for rendering pages */}
-        <main className="flex-1 w-full overflow-auto p-4">
+        <main className="flex-1 w-screen overflow-auto p-4">
           <Outlet />
         </main>
       </div>
