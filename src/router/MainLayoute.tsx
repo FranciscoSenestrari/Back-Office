@@ -43,6 +43,14 @@ export function MainLayout() {
             </li>
             <li>
               <Link
+                to="/pedidos"
+                className="block px-4 py-2 rounded hover:bg-gray-700"
+              >
+                Pedidos
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/informes"
                 className="block px-4 py-2 rounded hover:bg-gray-700"
               >

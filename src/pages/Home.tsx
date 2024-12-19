@@ -5,7 +5,7 @@ export function Home() {
     <div className="w-full">
       <h1>Welcome to Geralidne Back-Office!</h1>
       <p>This is the Home page.</p>
-      <img src="src\assets\geraldine.svg" />
+      <img src="src\assets\geraldine.svg" width={400} />
     </div>
   );
 }

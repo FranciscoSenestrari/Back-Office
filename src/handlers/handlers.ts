@@ -15,3 +15,8 @@ export function informes(fecha_inicio: string, fecha_fin: string) {
   );
   return response;
 }
+
+export function getPedidos() {
+  const response = axios.get(`${baseUrl}api/pedidos`);
+  return response;
+}
