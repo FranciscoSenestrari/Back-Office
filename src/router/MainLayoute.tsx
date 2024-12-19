@@ -35,10 +35,10 @@ export function MainLayout() {
             </li>
             <li>
               <Link
-                to="/dashboard/users"
+                to="/productos"
                 className="block px-4 py-2 rounded hover:bg-gray-700"
               >
-                Users
+                prudctos
               </Link>
             </li>
             <li>
