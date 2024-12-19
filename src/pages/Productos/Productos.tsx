@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { getProductos } from "../../handlers/handlers";
 import { useNavigate, useNavigation } from "react-router";
 export interface Producto {
-  id: number;
+  id?: number;
   nombre: string;
   descripcion: string | null;
   precio: number;

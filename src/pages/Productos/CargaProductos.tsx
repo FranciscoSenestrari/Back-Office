@@ -1,39 +1,65 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { cargarProductos } from "../../handlers/handlers";
+import { useNavigate } from "react-router";
 
-export interface Producto {
-  id: number;
+export interface ProductoCarga {
+  id?: number;
   nombre: string;
   descripcion: string | null;
   precio: number;
   sku: string | null;
-  activo: boolean;
   stock: number;
+  activo: boolean;
   umbralStockBajo: number;
-  imagenes: any[];
-  categoria: any | null;
-  pedidos: any | null;
-  marca: any | null;
-  subcategoria: any | null;
-  variante: any | null;
+  categoriaId: number | null;
+  imagenes?: any[];
+  pedidos?: any | null;
+  marcaId: number;
+  subcategoriaId: number;
+  varianteId: number | null;
 }
 
 export function CargaProductos() {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<Producto>();
+    formState: {
+      errors,
+      defaultValues = {
+        activo: true,
+      },
+    },
+  } = useForm<ProductoCarga>();
 
-  const onSubmit = (data: Producto) => {
-    console.log(data);
+  const onSubmit = async (data: ProductoCarga) => {
+    try {
+      console.log(data);
+      await cargarProductos({
+        nombre: data.nombre,
+        descripcion: data.descripcion,
+        precio: data.precio,
+        sku: data.sku,
+        stock: data.stock,
+        activo: true,
+        umbralStockBajo: data.umbralStockBajo,
+        categoriaId: data.categoriaId,
+        pedidos: data.pedidos,
+        marcaId: data.marcaId,
+        subcategoriaId: data.subcategoriaId,
+        varianteId: data.varianteId,
+      });
+      toast.success("Producto cargado correctamente");
+      navigate("/productos");
+    } catch (error) {
+      toast.error("Error al cargar producto");
+    }
   };
 
   return (
     <div className="p-6 bg-gray-800 rounded-lg shadow-lg">
-      <h1 className="text-white text-2xl font-semibold mb-4">
-        Carga de Productos
-      </h1>
       <div className="p-6 bg-gray-800 rounded-lg shadow-lg">
         <h1 className="text-white text-2xl font-semibold mb-4">
           Carga de Productos
@@ -107,7 +133,7 @@ export function CargaProductos() {
             />
           </div>
 
-          <div>
+          <div className="hidden">
             <label
               htmlFor="activo"
               className="block text-white font-medium mb-1"
@@ -117,6 +143,7 @@ export function CargaProductos() {
             <input
               type="checkbox"
               id="activo"
+              checked={true}
               {...register("activo")}
               className="h-5 w-5 text-blue-500 rounded focus:ring-0"
             />
@@ -163,11 +190,95 @@ export function CargaProductos() {
               </span>
             )}
           </div>
+          <div>
+            <label
+              htmlFor="marcaId"
+              className="block text-white font-medium mb-1"
+            >
+              MarcaId
+            </label>
+            <input
+              type="number"
+              id="marcaId"
+              {...register("marcaId", {
+                required: "Marca Id es obligatorio",
+              })}
+              className="w-full p-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.marcaId && (
+              <span className="text-red-500 text-sm">
+                {errors.marcaId.message}
+              </span>
+            )}
+          </div>
 
+          <div>
+            <label
+              htmlFor="marcaId"
+              className="block text-white font-medium mb-1"
+            >
+              VarianteID
+            </label>
+            <input
+              type="number"
+              id="varianteID"
+              {...register("varianteId", {
+                required: "variante Id es obligatorio",
+              })}
+              className="w-full p-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.varianteId && (
+              <span className="text-red-500 text-sm">
+                {errors.varianteId.message}
+              </span>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="Categoriaid"
+              className="block text-white font-medium mb-1"
+            >
+              Categoria ID
+            </label>
+            <input
+              type="number"
+              id="marcaId"
+              {...register("categoriaId", {
+                required: "Categoria Id es obligatorio",
+              })}
+              className="w-full p-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.categoriaId && (
+              <span className="text-red-500 text-sm">
+                {errors.categoriaId.message}
+              </span>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="subcatgoriaId"
+              className="block text-white font-medium mb-1"
+            >
+              Subcategoria ID
+            </label>
+            <input
+              type="number"
+              id="subcatgoriaId"
+              {...register("subcategoriaId", {
+                required: "Subcategoria Id es obligatorio",
+              })}
+              className="w-full p-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {errors.subcategoriaId && (
+              <span className="text-red-500 text-sm">
+                {errors.subcategoriaId.message}
+              </span>
+            )}
+          </div>
           <div className="col-span-2">
             <button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-sm bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Guardar Producto
             </button>

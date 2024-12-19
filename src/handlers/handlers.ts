@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Producto } from "../pages/Productos/Productos";
+import { ProductoCarga } from "../pages/Productos/CargaProductos";
 const baseUrl = "https://xh8p97s3-8080.brs.devtunnels.ms/";
 export function getUser(username: string) {
   const response = axios.get(`${baseUrl}api/user/profile?username=${username}`);
@@ -27,7 +28,7 @@ export function getProductos() {
   return response;
 }
 
-export function cargarProductos(producto: Producto) {
+export function cargarProductos(producto: ProductoCarga) {
   const response = axios.post(`${baseUrl}api/productos`, producto);
   return response;
 }
