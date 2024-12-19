@@ -20,3 +20,8 @@ export function getPedidos() {
   const response = axios.get(`${baseUrl}api/pedidos`);
   return response;
 }
+
+export function getProductos(producto: any) {
+  const response = axios.post(`${baseUrl}api/productos`, producto);
+  return response;
+}

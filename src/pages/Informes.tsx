@@ -38,7 +38,9 @@ export function Informes() {
           productosMasVendidos: "Camiseta Básica",
         },
       ];
+      const req = await informes(data.fecha_inicio, data.fecha_fin);
 
+      const item = req.data;
       // Título
       doc.setFontSize(16);
       doc.text("Informe de Datos", 10, 10);
@@ -51,18 +53,23 @@ export function Informes() {
       // Resultados de la query
       doc.text("Resultados:", 10, 40);
       let y = 50; // posición inicial en Y
-      mock.forEach((item: ResponseType) => {
-        doc.text(
-          `fecha inicio : ${item.fechaInicio}, Fecha fin: ${item.fechaFin}, numeroPedidos: ${item.numeroPedidos} ,productos mas vendidos: ${item.productosMasVendidos} Ventas totales: ${item.ventasTotales}  `,
-          10,
-          y
-        );
-        y += 10; // Incrementa la posición para la siguiente línea
-      });
+      //   req.data.forEach((item: ResponseType) => {
+      //     doc.text(
+      //       `fecha inicio : ${item.fechaInicio}, Fecha fin: ${item.fechaFin}, numeroPedidos: ${item.numeroPedidos} ,productos mas vendidos: ${item.productosMasVendidos} Ventas totales: ${item.ventasTotales}  `,
+      //       10,
+      //       y
+      //     );
+      //     y += 10; // Incrementa la posición para la siguiente línea
+      //   });
 
+      doc.text(
+        `fecha inicio : ${item.fechaInicio}, Fecha fin: ${item.fechaFin}, numeroPedidos: ${item.numeroPedidos} ,productos mas vendidos: ${item.productosMasVendidos} Ventas totales: ${item.ventasTotales}  `,
+        10,
+        y
+      );
+      y += 10; // Increment
       // Descargar el PDF
       doc.save("informe.pdf");
-      const req = await informes(data.fecha_inicio, data.fecha_fin);
     } catch (error) {
       toast.error("Error al generar el informe");
     }
