@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173" # Mapea el puerto 5173 del contenedor al puerto 5173 del host
+    volumes:
+      - .:/app  # Sincroniza el código fuente con el contenedor
+      - /app/node_modules # Evita conflictos con node_modules
