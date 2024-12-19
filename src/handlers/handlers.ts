@@ -11,7 +11,7 @@ export function login(username: string, password: string) {
 }
 export function informes(fecha_inicio: string, fecha_fin: string) {
   const response = axios.get(
-    `${baseUrl}aapi/informes/ventas?fechaInicio=${fecha_inicio}&fechaFin=${fecha_fin}`
+    `${baseUrl}api/informes/ventas?fechaInicio=${fecha_inicio}&fechaFin=${fecha_fin}`
   );
   return response;
 }
