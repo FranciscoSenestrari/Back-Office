@@ -7,7 +7,7 @@ export function MainLayout() {
 
   const { logout } = useAuth();
   return (
-    <div className="flex h-screen bg-gray-100 font-sans text-gray-900 min-w-0">
+    <div className="flex w-screen h-screen bg-gray-100 font-sans text-gray-900 min-w-0">
       {/* Sidebar */}
       <aside
         className={`bg-gray-800 text-white flex flex-col transition-all duration-300 ${
@@ -40,7 +40,7 @@ export function MainLayout() {
                 to="/productos"
                 className="block px-4 py-2 rounded hover:bg-gray-700"
               >
-                prudctos
+                Productos
               </Link>
             </li>
             <li>
@@ -91,7 +91,7 @@ export function MainLayout() {
         </header>
 
         {/* Outlet for rendering pages */}
-        <main className="flex-1 w-screen overflow-auto p-4">
+        <main className="flex-1 w-full overflow-auto p-4">
           <Outlet />
         </main>
       </div>

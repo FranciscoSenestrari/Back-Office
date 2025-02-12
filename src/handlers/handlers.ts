@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Producto } from "../pages/Productos/Productos";
 import { ProductoCarga } from "../pages/Productos/CargaProductos";
+import toast from "react-hot-toast";
 const baseUrl2 = "http://localhost:8080/";
 export const baseUrl = "https://8s6ggzdl-8080.brs.devtunnels.ms/";
 
@@ -36,4 +37,10 @@ export function getProductos() {
 export function cargarProductos(producto: ProductoCarga) {
   const response = axios.post(`${baseUrl}api/productos`, producto);
   return response;
+}
+
+export async function cambiarEstadoPedido(estado: string, id: number) {
+  await axios.put(`${baseUrl}api/pedidos/${id}/estado`, {
+    estado: estado,
+  });
 }

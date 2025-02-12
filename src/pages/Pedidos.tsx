@@ -1,19 +1,30 @@
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { getPedidos } from "../handlers/handlers";
+import { cambiarEstadoPedido, getPedidos } from "../handlers/handlers";
+import { DropdownPedidos } from "../components/DropdownPedidos";
+import DropDown from "../components/DropDown";
 
 export interface DataItem {
   id: number;
   activo: boolean;
   estado: string;
-  cliente: number;
-  producto: any[];
+  fechaCreacion: string;
+  clienteId: number;
+  productos?: {
+    id: number;
+    productoId: number;
+    nombreProducto: string;
+    cantidad: number;
+    precioUnitario: number;
+    subtotal: number;
+  }[];
   total: number;
 }
 
 export function Pedidos() {
   const [dataQuery, setData] = useState<DataItem[]>([]);
 
+  const estados = ["En_proceso", "Enviado", "Completado"];
   useEffect(() => {
     async function fetchData() {
       try {
@@ -27,30 +38,33 @@ export function Pedidos() {
   }, []);
 
   return (
-    <div>
+    <div className="w-full ">
       <h1>Pedidos</h1>
-      <h2>Obtener pedidos</h2>
-      <button
-        className="text-white bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
-        onClick={async () => {
-          try {
-            const req = await getPedidos();
-            setData(req.data);
-            toast.success("Datos actualizados");
-          } catch (error) {
-            toast.error("Error al obtener los datos");
-          }
-        }}
-      >
-        Obtener
-      </button>
-      <section>
-        <div className="p-4">
-          <table className="w-full table-auto border-collapse rounded-lg overflow-hidden shadow-lg">
+
+      <div className="p-6 bg-gray-900 min-h-screen  relative z-0">
+        <h1 className="text-2xl font-bold text-white mb-4">
+          Lista de Productos
+        </h1>
+        <button
+          className="text-white my-4"
+          onClick={async () => {
+            try {
+              const req = await getPedidos();
+              setData(req.data);
+              toast.success("Datos actualizados");
+            } catch (error) {
+              toast.error("Error al obtener los datos");
+            }
+          }}
+        >
+          Actualizar
+        </button>
+        <div className="overflow-x-auto ">
+          <table className="w-full  table-auto border-collapse rounded-lg overflow-hidden shadow-lg">
             <thead>
               <tr className="bg-gray-800 text-white">
                 <th className="p-3 text-left">ID</th>
-                <th className="p-3 text-left">Activo</th>
+                <th className="p-3 text-left">Fecha Creacion</th>
                 <th className="p-3 text-left">Estado</th>
                 <th className="p-3 text-left">Cliente</th>
                 <th className="p-3 text-left">Producto</th>
@@ -69,19 +83,28 @@ export function Pedidos() {
                     }
                   >
                     <td className="p-3">{item.id}</td>
-                    <td className="p-3">{item.activo ? "Sí" : "No"}</td>
+                    <td className="p-3">{item.fechaCreacion.split("T")[0]}</td>
                     <td className="p-3 capitalize">
-                      {item.estado.replace("_", " ")}
+                      <DropdownPedidos
+                        idPedido={item.id}
+                        estadoActual={item.estado}
+                        options={estados}
+                      />
                     </td>
-                    <td className="p-3">{item.cliente}</td>
-                    <td className="p-3">{item.producto.length}</td>
+                    <td className="p-3">{item.clienteId}</td>
+                    <td className="p-3">
+                      {
+                        //@ts-ignore
+                        <DropDown options={item.productos} />
+                      }
+                    </td>
                     <td className="p-3">{item.total.toFixed(2)}</td>
                   </tr>
                 ))}
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
