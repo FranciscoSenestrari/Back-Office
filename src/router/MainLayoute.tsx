@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Outlet, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContex";
 
 export function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+  const { logout } = useAuth();
   return (
     <div className="flex h-screen bg-gray-100 font-sans text-gray-900 min-w-0">
       {/* Sidebar */}
@@ -64,7 +66,12 @@ export function MainLayout() {
             isSidebarOpen ? "block" : "hidden"
           }`}
         >
-          <button className="w-full px-4 py-2 bg-red-600 rounded hover:bg-red-700">
+          <button
+            onClick={() => {
+              logout();
+            }}
+            className="w-full px-4 py-2 bg-red-600 rounded hover:bg-red-700"
+          >
             Logout
           </button>
         </div>
