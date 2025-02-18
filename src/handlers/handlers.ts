@@ -19,7 +19,8 @@ export function loginUser(username: string, password: string) {
 }
 export function informes(fecha_inicio: string, fecha_fin: string) {
   const response = axios.get(
-    `${baseUrl}api/informes/ventas?fechaInicio=${fecha_inicio}&fechaFin=${fecha_fin}`
+    `${baseUrl}api/estadisticas/ventastotales?fechaInicio=2025-02-01T00:00:00&fechaFin=2025-02-12T23:59:59`
+    //    `${baseUrl}api/informes/ventas?fechaInicio=${fecha_inicio}&fechaFin=${fecha_fin}`
   );
   return response;
 }
@@ -43,4 +44,22 @@ export async function cambiarEstadoPedido(estado: string, id: number) {
   await axios.put(`${baseUrl}api/pedidos/${id}/estado`, {
     estado: estado,
   });
+}
+export async function pedidosXfecha(fecha_inicio: string, fecha_fin: string) {
+  const response = await axios.get(
+    `${baseUrl}api/estadisticas/pedidos_por_fechas?fechaInicio=${fecha_inicio}T00:00:00&fechaFin=${fecha_fin}T23:59:59`
+  );
+  return response;
+}
+export async function productosMasVendidos() {
+  const response = await axios.get(
+    `${baseUrl}api/estadisticas/productosmasvendidos`
+  );
+  return response;
+}
+export async function productoMasRecaudo() {
+  const response = await axios.get(
+    `${baseUrl}api/estadisticas/productosmasrecaudados`
+  );
+  return response;
 }
