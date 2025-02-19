@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { jsPDF } from "jspdf";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   productosMasVendidos,
   pedidosXfecha,
@@ -9,6 +10,24 @@ import {
 import toast from "react-hot-toast";
 import InformeChecked from "../components/InformeChecked";
 import DownloadSVG from "../assets/DownloadSvg";
+import { Pedidos } from "./Pedidos";
+interface Producto {
+  id: number;
+  productoId: number;
+  nombreProducto: string;
+  cantidad: number;
+  precioUnitario: number;
+  subtotal: number;
+}
+
+type PedidosInforme = {
+  id: number;
+  clienteId: number;
+  estado: string;
+  fechaCreacion: string; // Puede ser Date si lo deseas
+  total: number;
+  productos: any[];
+};
 
 interface InformesType {
   fecha_inicio?: string;
@@ -37,7 +56,7 @@ export function Informes() {
       promises.push(
         pedidosXfecha(getValues("fecha_inicio")!, getValues("fecha_fin")!)
           .then((data) =>
-            informes.push({ titulo: "Informe de pedidos", datos: data })
+            informes.push({ titulo: "Informe de pedidos", datos: data.data })
           )
           .catch(() => toast.error("Error al generar el informe de pedidos"))
       );
@@ -87,83 +106,103 @@ export function Informes() {
   }
   function descargarInforme() {
     const fechaHoy = new Date(Date.now());
-
     const doc = new jsPDF();
     doc.setFontSize(16);
-    let y = 10;
-    doc.text("Informes Geraldine", 10, y);
-    y += 10;
-    doc.text(`Fecha del reporte:${fechaHoy.toLocaleDateString()}`, 10, y);
+
+    doc.text("Informes Geraldine", 10, 10);
     doc.setFontSize(12);
-    y += 10;
-    informe!.forEach(({ titulo, datos }) => {
-      doc.text(titulo, 10, y);
+    doc.text(`Fecha del reporte: ${fechaHoy.toLocaleDateString()}`, 10, 20);
+
+    informe?.forEach((informe, index) => {
+      let y = 30;
+
+      if (index !== 0) doc.addPage(); // Agrega nueva página solo si no es el primer informe
+
+      doc.setFontSize(16);
+      doc.text(informe.titulo, 10, y);
       y += 10;
-      if (Array.isArray(datos)) {
-        datos.forEach((item, index) => {
-          doc.text(`${index + 1}. ${item.nombre}:`, 10, y);
-          y += 6;
-          if (item.cantidadVendida) {
-            doc.text(`Cantidad vendida: ${item.cantidadVendida}`, 15, y);
-            y += 6;
-          }
-          if (item.totalVendido) {
-            doc.text(`Total recaudado: $${item.totalVendido}`, 15, y);
-            y += 6;
-          }
-          if (item.precioPorUnidad) {
-            doc.text(`Precio por unidad: $${item.precioPorUnidad}`, 15, y);
-            y += 6;
-          }
-          // if (item) {
-          //   // Definir las columnas de la tabla
-          //   const columns = [
-          //     "Pedido ID",
-          //     "Cliente ID",
-          //     "Estado",
-          //     "Fecha de Creación",
-          //     "Producto ID",
-          //     "Nombre Producto",
-          //     "Cantidad",
-          //     "Precio Unitario",
-          //     "Subtotal",
-          //   ];
-          //   doc.text("Reporte de Pedidos", 14, 20);
-          //   doc.table(2, 2, item, columns, { autoSize: true, fontSize: 12 });
 
-          //   const rows: any = [];
+      doc.setFontSize(14);
 
-          //   // Iterar sobre los pedidos y agregar los productos
-          //   // item.data.forEach((pedido) => {
-          //   //   pedido.productos.forEach((producto) => {
-          //   //     rows.push({
-          //   //       pedidoId: pedido.id,
-          //   //       clienteId: pedido.clienteId,
-          //   //       estado: pedido.estado,
-          //   //       fechaCreacion: pedido.fechaCreacion,
-          //   //       productoId: producto.productoId,
-          //   //       nombreProducto: producto.nombreProducto,
-          //   //       cantidad: producto.cantidad,
-          //   //       precioUnitario: producto.precioUnitario,
-          //   //       subtotal: producto.subtotal,
-          //   //     });
-          //   //   });
-          //   // });
-
-          //   // // Insertar la tabla con todos los pedidos y productos
-          //   // doc.table(10, 10, item, columns, { autoSize: true });
-          // }
-          y += 4;
-        });
-      } else {
-        doc.text(`Detalles: ${JSON.stringify(datos, null, 2)}`, 10, y);
+      if (informe.titulo === "Informe de pedidos") {
+        doc.text(`Pedidos totales: ${informe.datos.pedidosTotales}`, 10, y);
         y += 10;
+        doc.text(`Ventas Totales: ${informe.datos.ventasTotales}`, 10, y);
+        y += 10;
+
+        informe.datos.pedidos.forEach((pedido: any) => {
+          if (y > 280) {
+            // Salto de página si es necesario
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(`Pedido ID: ${pedido.id}`, 10, y);
+          y += 6;
+          doc.text(`Cliente ID: ${pedido.clienteId}`, 15, y);
+          y += 6;
+          doc.text(`Fecha de creación: ${pedido.fechaCreacion}`, 15, y);
+          y += 6;
+          doc.text(`Productos:`, 10, y);
+          y += 6;
+
+          pedido.productos.forEach((producto: any) => {
+            if (y > 280) {
+              doc.addPage();
+              y = 20;
+            }
+            doc.text(
+              `${producto.productoId}: ${producto.nombreProducto}`,
+              20,
+              y
+            );
+            y += 6;
+            doc.text(`Cantidad: ${producto.cantidad}`, 20, y);
+            y += 6;
+            doc.text(`Precio Unitario: ${producto.precioUnitario}`, 20, y);
+            y += 6;
+            doc.text(`Subtotal: ${producto.subtotal}`, 20, y);
+            y += 6;
+          });
+
+          y += 10;
+        });
+      }
+
+      if (informe.titulo === "Informe de productos más vendidos") {
+        informe.datos.forEach((producto: any) => {
+          if (y > 280) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(`Nombre: ${producto.nombre}`, 10, y);
+          y += 6;
+          doc.text(`Cantidad Vendida: ${producto.cantidadVendida}`, 20, y);
+          y += 6;
+          doc.text(`Precio Unitario: ${producto.precioPorUnidad}`, 20, y);
+          y += 6;
+          doc.text(`Total Recaudado: ${producto.totalVendido}`, 20, y);
+          y += 6;
+        });
+      }
+
+      if (informe.titulo === "Informe de productos con más ingresos") {
+        informe.datos.forEach((producto: any) => {
+          if (y > 280) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(`Nombre: ${producto.nombre}`, 10, y);
+          y += 6;
+          doc.text(`Cantidad Vendida : ${producto.cantidadVendida}`, 10, y);
+          y += 6;
+        });
       }
     });
 
     doc.save("Informe.pdf");
     toast.success("PDF generado correctamente");
   }
+
   return (
     <div className="w-full">
       <h1>Informes</h1>
