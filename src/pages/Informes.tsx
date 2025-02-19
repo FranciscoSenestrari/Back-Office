@@ -256,12 +256,12 @@ export function Informes() {
             title="Productos más vendidos"
             checked={productosChecked}
             setChecked={setProductosChecked}
-          ></InformeChecked>
+          />
           <InformeChecked
             title="Lista de productos que generaron más ingresos"
             checked={ingresosChecked}
             setChecked={setIngresosChecked}
-          ></InformeChecked>
+          />
           <div className="mt-4 w-full justify-end flex">
             <button
               className="p-4  text-white rounded"
@@ -277,6 +277,36 @@ export function Informes() {
             </button>
           </div>
         </div>
+        <section>
+          <h2 className="text-yellow-50">
+            {(informe?.length ?? 0) > 0
+              ? "Informes generados"
+              : "No hay informes disponibles"}
+          </h2>
+
+          {(informe?.length ?? 0) > 0 &&
+            (informe ?? []).map((item, index) => (
+              <div key={index} className="mb-4 overflow-x-auto">
+                <h3 className="text-lg font-bold text-white">{item.titulo}</h3>
+                <table className="w-full text-white border-collapse">
+                  <thead>
+                    <tr>
+                      <th>Campo</th>
+                      <th>Valor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(item.datos).map(([key, value], i) => (
+                      <tr key={i}>
+                        <td className="border p-2">{key}</td>
+                        <td className="border p-2">{JSON.stringify(value)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+        </section>
       </div>
     </div>
   );

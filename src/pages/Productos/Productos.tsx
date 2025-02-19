@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { getProductos } from "../../handlers/handlers";
 import { useNavigate, useNavigation } from "react-router";
+import DownloadSVG from "../../assets/DownloadSvg";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 export interface Producto {
   id?: number;
   nombre: string;
@@ -33,6 +36,48 @@ export function Productos() {
     fetchData();
   }, []);
   const navigate = useNavigate();
+  function descargarListaProducto() {
+    const doc = new jsPDF();
+    const table = document.getElementById(
+      "listaProductos"
+    ) as HTMLTableElement | null;
+
+    if (!table) {
+      console.error("No se encontró el elemento con ID 'listaProductos'");
+      return;
+    }
+
+    // Extraer los datos de la tabla
+    const headers: string[] = [];
+    const data: string[][] = [];
+
+    // Obtener los encabezados
+    const headerElements = table.querySelectorAll("thead tr th");
+
+    headerElements.forEach((th) => headers.push((th as HTMLElement).innerText));
+
+    // Obtener los datos de la tabla
+    const rowElements = table.querySelectorAll("tbody tr");
+    rowElements.forEach((row) => {
+      const rowData: string[] = [];
+      row.querySelectorAll("td").forEach((td) => rowData.push(td.innerText));
+      data.push(rowData);
+    });
+
+    doc.text("Lista de Productos", 10, 10);
+
+    // Generar la tabla en el PDF con autoTable
+    autoTable(doc, {
+      head: [headers], // Encabezados
+      body: data, // Datos de la tabla
+      startY: 30, // Margen superior
+      margin: { left: 10, right: 10 }, // Márgenes laterales
+      styles: { fontSize: 10, cellPadding: 2 }, // Ajustes de estilo
+    });
+
+    // Guardar el PDF
+    doc.save("lista_productos.pdf");
+  }
 
   return (
     <div className="w-full">
@@ -41,16 +86,29 @@ export function Productos() {
         <h1 className="text-2xl font-bold text-white mb-4">
           Lista de Productos
         </h1>
-        <button
-          className="text-white my-4"
-          onClick={() => {
-            navigate("/productos/cargar");
-          }}
-        >
-          Agregar
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            className="text-white my-4 "
+            onClick={() => {
+              descargarListaProducto();
+            }}
+          >
+            <DownloadSVG width={20} height={20} stroke="white" />
+          </button>
+          <button
+            className="text-white my-4"
+            onClick={() => {
+              navigate("/productos/cargar");
+            }}
+          >
+            Agregar
+          </button>
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full table-auto border-collapse rounded-lg overflow-hidden shadow-lg">
+          <table
+            id="listaProductos"
+            className="w-full table-auto border-collapse rounded-lg overflow-hidden shadow-lg"
+          >
             <thead>
               <tr className="bg-gray-800 text-white">
                 <th className="p-3 text-left">ID</th>
