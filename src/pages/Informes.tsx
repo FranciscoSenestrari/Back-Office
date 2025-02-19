@@ -11,29 +11,13 @@ import toast from "react-hot-toast";
 import InformeChecked from "../components/InformeChecked";
 import DownloadSVG from "../assets/DownloadSvg";
 import { Pedidos } from "./Pedidos";
-interface Producto {
-  id: number;
-  productoId: number;
-  nombreProducto: string;
-  cantidad: number;
-  precioUnitario: number;
-  subtotal: number;
-}
-
-type PedidosInforme = {
-  id: number;
-  clienteId: number;
-  estado: string;
-  fechaCreacion: string; // Puede ser Date si lo deseas
-  total: number;
-  productos: any[];
-};
+import { Line } from "react-chartjs-2";
 
 interface InformesType {
   fecha_inicio?: string;
   fecha_fin?: string;
 }
-type informType = {
+export type informType = {
   titulo: string;
   datos: any;
 };
