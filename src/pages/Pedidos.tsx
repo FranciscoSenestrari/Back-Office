@@ -42,9 +42,7 @@ export function Pedidos() {
       <h1>Pedidos</h1>
 
       <div className="p-6 bg-gray-900 min-h-screen  relative z-0">
-        <h1 className="text-2xl font-bold text-white mb-4">
-          Lista de Productos
-        </h1>
+        <h1 className="text-2xl font-bold text-white mb-4">Lista de Pedidos</h1>
         <button
           className="text-white my-4"
           onClick={async () => {
