@@ -10,8 +10,8 @@ import {
 import toast from "react-hot-toast";
 import InformeChecked from "../components/InformeChecked";
 import DownloadSVG from "../assets/DownloadSvg";
-import { Pedidos } from "./Pedidos";
 import { Line } from "react-chartjs-2";
+import InformeTable from "../components/InformeTable";
 
 interface InformesType {
   fecha_inicio?: string;
@@ -194,7 +194,6 @@ export function Informes() {
         <h2 className="text-yellow-50">
           Ingrese las fechas para generar el informe
         </h2>
-
         <div className="flex gap-4 flex-col text-white">
           <InformeChecked
             title="Pedidos por fecha"
@@ -254,43 +253,19 @@ export function Informes() {
               Generar Informe
             </button>
             <button
-              className="p-4  text-white rounded"
+              disabled={!informe}
+              className={
+                !informe
+                  ? "p-4bg-gray-400 text-gray-600 cursor-not-allowed opacity-50 py-2 px-4 rounded"
+                  : "p-4  text-white rounded"
+              }
               onClick={descargarInforme}
             >
               <DownloadSVG width={20} height={20} stroke="white" />
             </button>
           </div>
         </div>
-        <section>
-          <h2 className="text-yellow-50">
-            {(informe?.length ?? 0) > 0
-              ? "Informes generados"
-              : "No hay informes disponibles"}
-          </h2>
-
-          {(informe?.length ?? 0) > 0 &&
-            (informe ?? []).map((item, index) => (
-              <div key={index} className="mb-4 overflow-x-auto">
-                <h3 className="text-lg font-bold text-white">{item.titulo}</h3>
-                <table className="w-full text-white border-collapse">
-                  <thead>
-                    <tr>
-                      <th>Campo</th>
-                      <th>Valor</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(item.datos).map(([key, value], i) => (
-                      <tr key={i}>
-                        <td className="border p-2">{key}</td>
-                        <td className="border p-2">{JSON.stringify(value)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))}
-        </section>
+        <InformeTable informe={informe!} />
       </div>
     </div>
   );
