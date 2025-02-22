@@ -6,19 +6,25 @@ import {
   productosMasVendidos,
   pedidosXfecha,
   productoMasRecaudo,
+  productosMasVendidosFecha,
 } from "../handlers/handlers";
 import toast from "react-hot-toast";
 import InformeChecked from "../components/InformeChecked";
-import DownloadSVG from "../assets/DownloadSvg";
-import { Line } from "react-chartjs-2";
 import InformeTable from "../components/InformeTable";
+import DownloadSVG from "../assets/DownloadSvg";
 
 interface InformesType {
   fecha_inicio?: string;
   fecha_fin?: string;
+  fecha_inicioProducto?: string;
+  fecha_finProducto?: string;
 }
 export type informType = {
   titulo: string;
+  rangoFechas?: {
+    fecha_inicio: string;
+    fecha_fin: string;
+  };
   datos: any;
 };
 export function Informes() {
@@ -34,13 +40,16 @@ export function Informes() {
 
   async function generarInforme() {
     const informes: { titulo: string; datos: any }[] = [];
-    const promises: Promise<any>[] = []; // Cambié Promise<void>[] a Promise<any>[]
+    const promises: Promise<any>[] = [];
 
     if (pedidosChecked) {
       promises.push(
         pedidosXfecha(getValues("fecha_inicio")!, getValues("fecha_fin")!)
           .then((data) =>
-            informes.push({ titulo: "Informe de pedidos", datos: data.data })
+            informes.push({
+              titulo: "Informe de pedidos",
+              datos: data.data,
+            })
           )
           .catch(() => toast.error("Error al generar el informe de pedidos"))
       );
@@ -48,8 +57,11 @@ export function Informes() {
 
     if (productosChecked) {
       promises.push(
-        productoMasRecaudo()
-          .then((data) =>
+        productosMasVendidosFecha(
+          getValues("fecha_inicioProducto")!,
+          getValues("fecha_finProducto")!
+        )
+          .then((data: any) =>
             informes.push({
               titulo: "Informe de productos más vendidos",
               datos: data.data,
@@ -81,7 +93,6 @@ export function Informes() {
     await Promise.all(promises);
 
     if (informes.length > 0) {
-      console.log(informes);
       setInfome(informes);
       toast.success("Informes generados correctamente");
     } else {
@@ -153,23 +164,27 @@ export function Informes() {
       }
 
       if (informe.titulo === "Informe de productos más vendidos") {
-        informe.datos.forEach((producto: any) => {
-          if (y > 280) {
-            doc.addPage();
-            y = 20;
-          }
-          doc.text(`Nombre: ${producto.nombre}`, 10, y);
-          y += 6;
-          doc.text(`Cantidad Vendida: ${producto.cantidadVendida}`, 20, y);
-          y += 6;
-          doc.text(`Precio Unitario: ${producto.precioPorUnidad}`, 20, y);
-          y += 6;
-          doc.text(`Total Recaudado: ${producto.totalVendido}`, 20, y);
-          y += 6;
+        const formattedData = informe.datos.map((item: any) => [
+          item.nombre,
+          item.cantidadVendida,
+        ]);
+
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+
+        autoTable(doc, {
+          head: [["Nombre", "Cantidad Vendida"]],
+          body: formattedData,
+          startY: y,
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [40, 40, 40], textColor: [255, 255, 255] },
         });
       }
 
       if (informe.titulo === "Informe de productos con más ingresos") {
+        //el que mas recaudo
         informe.datos.forEach((producto: any) => {
           if (y > 280) {
             doc.addPage();
@@ -239,12 +254,48 @@ export function Informes() {
             title="Productos más vendidos"
             checked={productosChecked}
             setChecked={setProductosChecked}
-          />
+          >
+            <div className="overflow-x-auto flex">
+              <div className="flex gap-4 w-full text-white">
+                <div>
+                  <p>Fecha inicio</p>
+                  <input
+                    className="p-3"
+                    {...register("fecha_inicioProducto", {
+                      required: productosChecked ? "Campo obligatorio" : false,
+                    })}
+                    type="date"
+                  />
+                  {errors.fecha_inicio && (
+                    <p className="text-red-500 text-sm">
+                      {errors.fecha_inicio.message}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <p>Fecha fin</p>
+                  <input
+                    className="p-3"
+                    type="date"
+                    {...register("fecha_finProducto", {
+                      required: productosChecked ? "Campo obligatorio" : false,
+                    })}
+                  />
+                  {errors.fecha_fin && (
+                    <p className="text-red-500 text-sm">
+                      {errors.fecha_fin.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </InformeChecked>
+
           <InformeChecked
             title="Lista de productos que generaron más ingresos"
             checked={ingresosChecked}
             setChecked={setIngresosChecked}
-          />
+          ></InformeChecked>
           <div className="mt-4 w-full justify-end flex">
             <button
               className="p-4  text-white rounded"
