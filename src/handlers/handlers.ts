@@ -51,18 +51,16 @@ export async function pedidosXfecha(fecha_inicio: string, fecha_fin: string) {
   );
   return response;
 }
-export async function productosMasVendidos() {
+export async function productoMasRecaudo(
+  fecha_inicio: string,
+  fecha_fin: string
+) {
   const response = await axios.get(
-    `${baseUrl}api/estadisticas/productosmasvendidos`
+    `${baseUrl}api/estadisticas/productosmasrecaudados?fechaInicio=${fecha_inicio}T00:00:00&fechaFin=${fecha_fin}T23:59:59`
   );
   return response;
 }
-export async function productoMasRecaudo() {
-  const response = await axios.get(
-    `${baseUrl}api/estadisticas/productosmasrecaudados`
-  );
-  return response;
-}
+
 export async function productosMasVendidosFecha(
   fecha_inicio: string,
   fecha_fin: string

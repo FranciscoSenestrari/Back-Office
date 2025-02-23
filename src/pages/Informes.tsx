@@ -3,9 +3,8 @@ import { useForm } from "react-hook-form";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
-  productosMasVendidos,
-  pedidosXfecha,
   productoMasRecaudo,
+  pedidosXfecha,
   productosMasVendidosFecha,
 } from "../handlers/handlers";
 import toast from "react-hot-toast";
@@ -18,6 +17,8 @@ interface InformesType {
   fecha_fin?: string;
   fecha_inicioProducto?: string;
   fecha_finProducto?: string;
+  fecha_inicioIngresos?: string;
+  fecha_finIngresos?: string;
 }
 export type informType = {
   titulo: string;
@@ -75,7 +76,10 @@ export function Informes() {
 
     if (ingresosChecked) {
       promises.push(
-        productosMasVendidos()
+        productoMasRecaudo(
+          getValues("fecha_inicioIngresos")!,
+          getValues("fecha_finIngresos")!
+        )
           .then((data: any) =>
             informes.push({
               titulo: "Informe de productos con más ingresos",
@@ -111,55 +115,52 @@ export function Informes() {
     informe?.forEach((informe, index) => {
       let y = 30;
 
-      if (index !== 0) doc.addPage(); // Agrega nueva página solo si no es el primer informe
+      if (index !== 0) doc.addPage();
 
       doc.setFontSize(16);
-      doc.text(informe.titulo, 10, y);
+      doc.text(informe.titulo, 5, y);
       y += 10;
 
       doc.setFontSize(14);
 
       if (informe.titulo === "Informe de pedidos") {
-        doc.text(`Pedidos totales: ${informe.datos.pedidosTotales}`, 10, y);
+        doc.text(`Pedidos totales: ${informe.datos.pedidosTotales}`, 5, y);
         y += 10;
-        doc.text(`Ventas Totales: ${informe.datos.ventasTotales}`, 10, y);
+        doc.text(`Ventas Totales: ${informe.datos.ventasTotales}`, 5, y);
         y += 10;
 
-        informe.datos.pedidos.forEach((pedido: any) => {
-          if (y > 280) {
-            // Salto de página si es necesario
-            doc.addPage();
-            y = 20;
-          }
-          doc.text(`Pedido ID: ${pedido.id}`, 10, y);
-          y += 6;
-          doc.text(`Cliente ID: ${pedido.clienteId}`, 15, y);
-          y += 6;
-          doc.text(`Fecha de creación: ${pedido.fechaCreacion}`, 15, y);
-          y += 6;
-          doc.text(`Productos:`, 10, y);
-          y += 6;
+        // Construimos el cuerpo de la tabla con todos los pedidos
+        const body = informe.datos.pedidos.map((pedido: any) => [
+          pedido.id,
+          pedido.clienteId,
+          pedido.fechaCreacion.split("T")[0],
+          pedido.estado,
+          pedido.productos
+            .map(
+              (p: any) =>
+                `- ${p.cantidad}x ${p.nombreProducto} ($${p.subtotal})`
+            )
+            .join("\n"),
+          pedido.total,
+        ]);
 
-          pedido.productos.forEach((producto: any) => {
-            if (y > 280) {
-              doc.addPage();
-              y = 20;
-            }
-            doc.text(
-              `${producto.productoId}: ${producto.nombreProducto}`,
-              20,
-              y
-            );
-            y += 6;
-            doc.text(`Cantidad: ${producto.cantidad}`, 20, y);
-            y += 6;
-            doc.text(`Precio Unitario: ${producto.precioUnitario}`, 20, y);
-            y += 6;
-            doc.text(`Subtotal: ${producto.subtotal}`, 20, y);
-            y += 6;
-          });
-
-          y += 10;
+        autoTable(doc, {
+          head: [
+            [
+              "ID",
+              "Cliente ID",
+              "Fecha de creación",
+              "Estado",
+              "Productos",
+              "Total",
+            ],
+          ],
+          body,
+          startY: y,
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [40, 40, 40], textColor: [255, 255, 255] },
+          margin: { top: 10 },
+          alternateRowStyles: { fillColor: [230, 230, 250] },
         });
       }
 
@@ -180,20 +181,38 @@ export function Informes() {
           startY: y,
           styles: { fontSize: 10 },
           headStyles: { fillColor: [40, 40, 40], textColor: [255, 255, 255] },
+          alternateRowStyles: { fillColor: [230, 230, 250] },
         });
       }
 
       if (informe.titulo === "Informe de productos con más ingresos") {
         //el que mas recaudo
-        informe.datos.forEach((producto: any) => {
-          if (y > 280) {
-            doc.addPage();
-            y = 20;
-          }
-          doc.text(`Nombre: ${producto.nombre}`, 10, y);
-          y += 6;
-          doc.text(`Cantidad Vendida : ${producto.cantidadVendida}`, 10, y);
-          y += 6;
+        const formattedData = informe.datos.map((item: any) => [
+          item.nombre,
+          item.precioPorUnidad,
+          item.cantidadVendida,
+          item.totalVendido,
+        ]);
+
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+
+        autoTable(doc, {
+          head: [
+            [
+              "Nombre",
+              "Precio Por Unidad",
+              "Cantidad Vendida",
+              "Total Vendidos",
+            ],
+          ],
+          body: formattedData,
+          startY: y,
+          styles: { fontSize: 10 },
+          headStyles: { fillColor: [40, 40, 40], textColor: [255, 255, 255] },
+          alternateRowStyles: { fillColor: [230, 230, 250] },
         });
       }
     });
@@ -295,7 +314,30 @@ export function Informes() {
             title="Lista de productos que generaron más ingresos"
             checked={ingresosChecked}
             setChecked={setIngresosChecked}
-          ></InformeChecked>
+          >
+            <div className="flex gap-4 w-full text-white">
+              <div>
+                <p>Fecha inicio</p>
+                <input
+                  className="p-3"
+                  {...register("fecha_inicioIngresos", {
+                    required: productosChecked ? "Campo obligatorio" : false,
+                  })}
+                  type="date"
+                />
+              </div>
+              <div>
+                <p>Fecha fin</p>
+                <input
+                  className="p-3"
+                  type="date"
+                  {...register("fecha_finIngresos", {
+                    required: productosChecked ? "Campo obligatorio" : false,
+                  })}
+                />
+              </div>
+            </div>
+          </InformeChecked>
           <div className="mt-4 w-full justify-end flex">
             <button
               className="p-4  text-white rounded"
