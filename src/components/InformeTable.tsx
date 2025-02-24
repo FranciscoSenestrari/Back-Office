@@ -1,35 +1,12 @@
+import Plot from "react-plotly.js";
 import { informType } from "../pages/Informes";
 import DropDown from "./DropDown";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import PlotBar from "./PlotData";
+import PlotPie from "./PlotPie";
 
 export default function InformeTable({ informe }: { informe: informType[] }) {
   if (!informe || informe.length === 0)
     return <p className="text-white">No hay informes disponibles</p>;
-
-  const handleDownloadPDF = (title: string, data: any[]) => {
-    if (!data || data.length === 0) return;
-
-    const doc = new jsPDF();
-    doc.text(title, 14, 10);
-
-    const headers = Object.keys(data[0] ?? {}); // Extrae encabezados de la primera fila
-    const rows = data.map((row) =>
-      headers.map((key) =>
-        typeof row[key] === "object" ? "Ver detalles" : row[key]
-      )
-    );
-
-    autoTable(doc, {
-      head: [headers],
-      body: rows,
-      startY: 20,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [40, 40, 40], textColor: [255, 255, 255] },
-    });
-
-    doc.save(`${title}.pdf`);
-  };
 
   return (
     <section className="relative p-4">
@@ -98,12 +75,13 @@ export default function InformeTable({ informe }: { informe: informType[] }) {
                     ))}
                   </tbody>
                 </table>
-                <button
-                  onClick={() => handleDownloadPDF(item.titulo, datos)}
-                  className="mb-4 my-6 px-4 py-2 justify-end text-white rounded-lg transition"
-                >
-                  Descargar PDF
-                </button>
+                <div className="text-white">
+                  {item.titulo !== "Informe de pedidos" ? (
+                    <PlotBar item={item} />
+                  ) : (
+                    <PlotPie item={item} />
+                  )}
+                </div>
               </>
             ) : (
               <p className="text-white">No hay datos disponibles.</p>
